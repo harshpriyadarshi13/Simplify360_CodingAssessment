@@ -1,1 +1,111 @@
+Question 2:
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Both Alice & Bob have friends. Create a Java/Python/JS/Typescript console application to find all the friends of Alice 
+and all the friends of Bob & common friends of Alice and Bob.
+Your algorithm should be able to do the following:
+Take any 2 friends and find the common friends between the 2 friends
+Take any 2 friends find the nth connection - for example: connection(Alice, Janice) => 2
+Alice has friend Bob and Bob has friend Janice, if the input given is Alice and Janice the output should be 2,
+meaning 2nd connection, that means Janice is the second connection of Alice and Bob being the 1st connection of Alice.
+Likewise if input given is Alice and Bob, the output should be 1, for 1st connection
+If there is no connection at all, it should return -1
+Add the console applications(programs) to your Github account and share the Github links for evaluation. 
+Make sure your code is executable and free of syntax errors. Also please explain the Time and Space complexity of your respective programs as code comments
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+Answer :
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+from collections import defaultdict, deque
+
+# Function to perform topological sorting
+def topological_sort(graph, in_degree):
+    topo_order = []
+    queue = deque([node for node in graph if in_degree[node] == 0])
+    
+    while queue:
+        node = queue.popleft()
+        topo_order.append(node)
+        
+        for neighbor in graph[node]:
+            in_degree[neighbor] -= 1
+            if in_degree[neighbor] == 0:
+                queue.append(neighbor)
+    
+    return topo_order
+
+# Function to calculate EST, EFT, LST, LFT
+def calculate_times(tasks, durations, dependencies):
+    # Initialize graph and in-degree for topological sorting
+    graph = defaultdict(list)
+    in_degree = {task: 0 for task in tasks}
+    
+    # Build the graph and calculate in-degree for each task
+    for pre, post in dependencies:
+        graph[pre].append(post)
+        in_degree[post] += 1
+    
+    # Topological sorting
+    topo_order = topological_sort(graph, in_degree)
+    
+    # Initialize EST and EFT
+    EST = {task: 0 for task in tasks}
+    EFT = {}
+    
+    # Forward pass to calculate EST and EFT
+    for task in topo_order:
+        EFT[task] = EST[task] + durations[task]
+        for neighbor in graph[task]:
+            EST[neighbor] = max(EST[neighbor], EFT[task])
+    
+    # Initialize LFT and LST
+    LFT = {task: float('inf') for task in tasks}
+    LST = {}
+    
+    # Set LFT of the last task to its EFT
+    max_eft = max(EFT.values())
+    for task in topo_order:
+        if not graph[task]:  # If no outgoing edges (last tasks)
+            LFT[task] = max_eft
+    
+    # Backward pass to calculate LFT and LST
+    for task in reversed(topo_order):
+        LST[task] = LFT[task] - durations[task]
+        for neighbor in graph[task]:
+            LFT[task] = min(LFT[task], LST[neighbor])
+    
+    # Earliest and latest completion times
+    earliest_completion_time = max(EFT.values())
+    latest_completion_time = max(LFT.values())
+    
+    return earliest_completion_time, latest_completion_time
+
+# Example tasks, durations, and dependencies
+tasks = ['T_START', 'A', 'B', 'C', 'D', 'E', 'F', 'G']
+durations = {
+    'T_START': 0, 
+    'A': 3, 
+    'B': 2, 
+    'C': 4, 
+    'D': 6, 
+    'E': 1, 
+    'F': 2, 
+    'G': 1
+}
+dependencies = [
+    ('T_START', 'A'), 
+    ('T_START', 'B'), 
+    ('A', 'C'), 
+    ('B', 'C'), 
+    ('C', 'D'), 
+    ('C', 'E'), 
+    ('D', 'F'), 
+    ('E', 'F'), 
+    ('F', 'G')
+]
+
+earliest_time, latest_time = calculate_times(tasks, durations, dependencies)
+
+print(f"Earliest time all tasks will be completed: {earliest_time}")
+print(f"Latest time all tasks will be completed: {latest_time}")
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
