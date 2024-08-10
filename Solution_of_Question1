@@ -1,1 +1,80 @@
+Question 1:
+----------------------------------------------------------------------------------------------------------------------------------------------------
+We have a large and complex workflow, made of tasks. And have to decide who does what, when, so it all gets done on time.
+All tasks have dependency on other tasks to complete
+Each task(t) has a
+D[t] = duration of task
+EFT[t] = the earliest finish time for a task
+LFT[t] = the latest finish time for a task
+EST[t] = the earliest start time for a task
+LST[t] = the last start time for a task
+Assume that “clock” starts at 0 (project starting time).
+We are given the starting task T_START where the EST[t] = 0 and LST[t] = 0
+You have to write an Java/Python/JS/Typescript console application to answer the following questions
+Earliest time all the tasks will be completed?
+Latest time all tasks will be completed?
+-------------------------------------------------------------------------------------------------------------------------------------------------------
 
+Answer :
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+from collections import defaultdict, deque
+
+class SocialNetwork:
+    def __init__(self):
+        self.friends = defaultdict(set)
+    
+    def add_friendship(self, person1, person2):
+        self.friends[person1].add(person2)
+        self.friends[person2].add(person1)
+    
+    def get_friends(self, person):
+        return self.friends[person]
+    
+    def common_friends(self, person1, person2):
+        return self.friends[person1].intersection(self.friends[person2])
+    
+    def nth_connection(self, person1, person2):
+        if person1 == person2:
+            return 0
+        
+        queue = deque([(person1, 0)])
+        visited = set([person1])
+        
+        while queue:
+            current, level = queue.popleft()
+            for friend in self.friends[current]:
+                if friend == person2:
+                    return level + 1
+                if friend not in visited:
+                    visited.add(friend)
+                    queue.append((friend, level + 1))
+        
+        return -1
+
+# Example Usage:
+if __name__ == "__main__":
+    network = SocialNetwork()
+    
+    # Adding friendships
+    network.add_friendship('Alice', 'Bob')
+    network.add_friendship('Bob', 'Janice')
+    network.add_friendship('Alice', 'Charlie')
+    network.add_friendship('Charlie', 'David')
+    network.add_friendship('David', 'Eve')
+    network.add_friendship('Eve', 'Bob')
+    
+    # Finding friends
+    print("Friends of Alice:", network.get_friends('Alice'))
+    print("Friends of Bob:", network.get_friends('Bob'))
+    
+    # Finding common friends
+    print("Common friends of Alice and Bob:", network.common_friends('Alice', 'Bob'))
+    
+    # Finding nth connection
+    print("Connection between Alice and Janice:", network.nth_connection('Alice', 'Janice'))
+    print("Connection between Alice and Bob:", network.nth_connection('Alice', 'Bob'))
+    print("Connection between Alice and David:", network.nth_connection('Alice', 'David'))
+    print("Connection between Alice and Eve:", network.nth_connection('Alice', 'Eve'))
+    print("Connection between Alice and Nonexistent:", network.nth_connection('Alice', 'Nonexistent'))
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
